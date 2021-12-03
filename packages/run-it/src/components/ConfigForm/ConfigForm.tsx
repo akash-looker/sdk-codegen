@@ -72,7 +72,7 @@ const defaultFieldValues: IFieldValues = {
   /** not currently used but declared for property compatibility for ILoadedSpecs */
   headless: false,
   specs: {},
-  fetchResult: '',
+  error: '',
   fetchIntent: POSITIVE,
 }
 

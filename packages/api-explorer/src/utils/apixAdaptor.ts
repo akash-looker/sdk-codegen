@@ -23,30 +23,11 @@
  SOFTWARE.
 
  */
-import { createStore } from '@looker/redux'
+import type { IEnvironmentAdaptor } from '@looker/extension-utils'
+import { getEnvAdaptor } from '@looker/extension-utils'
 
-import type { SettingState } from './settings'
-import { defaultSettingsState, settingsSlice } from './settings'
-import type { LodesState } from './lodes'
-import { lodesSlice, defaultLodesState } from './lodes'
-import type { SpecState } from './specs'
-import { defaultSpecsState, specsSlice } from './specs'
-
-export const store = createStore({
-  preloadedState: {
-    settings: defaultSettingsState,
-    lodes: defaultLodesState,
-    specs: defaultSpecsState,
-  },
-  reducer: {
-    settings: settingsSlice.reducer,
-    lodes: lodesSlice.reducer,
-    specs: specsSlice.reducer,
-  },
-})
-
-export interface RootState {
-  settings: SettingState
-  lodes: LodesState
-  specs: SpecState
+export interface IApixAdaptor extends IEnvironmentAdaptor {
+  fetchSpecList(): Promise<any>
 }
+
+export const getApixAdaptor = () => getEnvAdaptor() as IApixAdaptor

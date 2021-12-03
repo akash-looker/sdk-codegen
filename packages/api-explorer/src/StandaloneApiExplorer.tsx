@@ -25,80 +25,64 @@
  */
 
 import type { FC } from 'react'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
-  RunItProvider,
-  loadSpecsFromVersions,
+  fallbackFetch,
+  fullify,
+  funFetch,
+  initRunItSdk,
   RunItConfigKey,
   RunItNoConfig,
-  initRunItSdk,
+  RunItProvider,
 } from '@looker/run-it'
-import type { SpecList } from '@looker/sdk-codegen'
 import { Provider } from 'react-redux'
 import { BrowserAdaptor } from '@looker/extension-utils'
+import type { IAPIMethods } from '@looker/sdk-rtl'
+import type { SpecItem, SpecList } from '@looker/sdk-codegen'
+import { getSpecsFromVersions } from '@looker/sdk-codegen'
 
 import { ApiExplorer } from './ApiExplorer'
 import { store } from './state'
-import { Loader } from './components'
+import type { IApixAdaptor } from './utils'
 
 export interface StandaloneApiExplorerProps {
   headless?: boolean
   versionsUrl: string
 }
 
-const browserAdaptor = new BrowserAdaptor(initRunItSdk())
-
-const loadVersions = async (current: string) => {
-  const data = await browserAdaptor.localStorageGetItem(RunItConfigKey)
-  const config = data ? JSON.parse(data) : RunItNoConfig
-  let url = config.base_url ? `${config.base_url}/versions` : current
-  let response = await loadSpecsFromVersions(url)
-  if (response.fetchResult) {
-    console.error(
-      `Reverting to ${current} due to ${url} error: ${response.fetchResult}`
-    )
-    // The stored server location has an error so default to current
-    url = current
-    response = await loadSpecsFromVersions(url)
+export class ApixAdaptor extends BrowserAdaptor implements IApixAdaptor {
+  constructor(sdk: IAPIMethods, private readonly fallbackVersionsUrl: string) {
+    super(sdk)
   }
-  return { url, response }
+
+  async fetchSpecList(): Promise<SpecList> {
+    // TODO: make this throw on failure
+    const data = await this.localStorageGetItem(RunItConfigKey)
+    const config = data ? JSON.parse(data) : RunItNoConfig
+    const url = config.base_url
+      ? `${config.base_url}/versions`
+      : `${this.fallbackVersionsUrl}/versions.json`
+    const versions = await this.sdk.authSession.transport.rawRequest('GET', url)
+    const specs = await getSpecsFromVersions(JSON.parse(versions.body))
+    return specs
+  }
+
+  async fetchSpec(spec: SpecItem): Promise<SpecItem> {
+    spec.specURL = fullify(spec.specURL, origin)
+    spec.api = await fallbackFetch(spec, funFetch)
+    return spec
+  }
 }
 
 export const StandaloneApiExplorer: FC<StandaloneApiExplorerProps> = ({
   headless = false,
-  versionsUrl = '',
 }) => {
-  const [specs, setSpecs] = useState<SpecList | undefined>()
-  const [currentVersionsUrl, setCurrentVersionsUrl] =
-    useState<string>(versionsUrl)
-
-  useEffect(() => {
-    if (currentVersionsUrl) {
-      loadVersions(currentVersionsUrl).then((result) => {
-        setCurrentVersionsUrl(result.url)
-        const response = result.response
-        setSpecs(response.specs)
-      })
-    } else {
-      setSpecs(undefined)
-    }
-  }, [versionsUrl, currentVersionsUrl])
+  const browserAdaptor = new ApixAdaptor(initRunItSdk(), window.origin)
 
   return (
     <Provider store={store}>
       <RunItProvider basePath="/api/4.0">
-        <>
-          {specs ? (
-            <ApiExplorer
-              specs={specs}
-              adaptor={browserAdaptor}
-              headless={headless}
-              setVersionsUrl={setCurrentVersionsUrl}
-            />
-          ) : (
-            <Loader themeOverrides={browserAdaptor.themeOverrides()} />
-          )}
-        </>
+        <ApiExplorer adaptor={browserAdaptor} headless={headless} />
       </RunItProvider>
     </Provider>
   )

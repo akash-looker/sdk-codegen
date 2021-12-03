@@ -108,7 +108,9 @@ let extensionAdaptor: IEnvironmentAdaptor | undefined
  * Register the environment adaptor. Used when initializing the application
  * @param adaptor to register
  */
-export const registerEnvAdaptor = (adaptor: IEnvironmentAdaptor) => {
+export const registerEnvAdaptor = <T extends IEnvironmentAdaptor>(
+  adaptor: T
+) => {
   extensionAdaptor = adaptor
 }
 
@@ -133,7 +135,9 @@ export const getEnvAdaptor = () => {
  * Used by some unit tests
  * @param adaptor to use for testing
  */
-export const registerTestEnvAdaptor = (adaptor?: IEnvironmentAdaptor) => {
+export const registerTestEnvAdaptor = <T extends IEnvironmentAdaptor>(
+  adaptor?: T
+) => {
   const mockSdk = {} as unknown as IAPIMethods
   registerEnvAdaptor(adaptor || new BrowserAdaptor(mockSdk))
 }

@@ -23,30 +23,13 @@
  SOFTWARE.
 
  */
-import { createStore } from '@looker/redux'
+import type { RootState } from '../store'
 
-import type { SettingState } from './settings'
-import { defaultSettingsState, settingsSlice } from './settings'
-import type { LodesState } from './lodes'
-import { lodesSlice, defaultLodesState } from './lodes'
-import type { SpecState } from './specs'
-import { defaultSpecsState, specsSlice } from './specs'
+const selectSpecsState = (state: RootState) => state.specs
 
-export const store = createStore({
-  preloadedState: {
-    settings: defaultSettingsState,
-    lodes: defaultLodesState,
-    specs: defaultSpecsState,
-  },
-  reducer: {
-    settings: settingsSlice.reducer,
-    lodes: lodesSlice.reducer,
-    specs: specsSlice.reducer,
-  },
-})
+export const selectSpecs = (state: RootState) => selectSpecsState(state).specs
 
-export interface RootState {
-  settings: SettingState
-  lodes: LodesState
-  specs: SpecState
+export const selectCurrentSpec = (state: RootState) => {
+  const specState = selectSpecsState(state)
+  return specState.specs[specState.currentSpecKey]
 }

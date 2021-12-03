@@ -101,7 +101,7 @@ export interface SpecItem {
   /** Compiled version of spec */
   api?: ApiModel
   /** URL for retrieving spec */
-  specURL?: string
+  specURL: string
   /** string content of spec */
   specContent?: string
 }
