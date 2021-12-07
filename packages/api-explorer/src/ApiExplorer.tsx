@@ -104,9 +104,11 @@ export const ApiExplorer: FC<ApiExplorerProps> = ({
     }
   }, [])
 
+  registerEnvAdaptor(adaptor)
   useEffect(() => {
-    registerEnvAdaptor(adaptor)
-    initSpecsAction()
+    console.log('APIX mount, calling login')
+    adaptor.login()
+    // initSpecsAction()
     return () => unregisterEnvAdaptor()
   }, [])
 
@@ -134,6 +136,13 @@ export const ApiExplorer: FC<ApiExplorerProps> = ({
         loadGoogleFonts={themeOverrides.loadGoogleFonts}
         themeCustomizations={themeOverrides.themeCustomizations}
       >
+        <AppRouter
+          specKey={spec?.key}
+          spec={spec?.api}
+          specs={specs}
+          toggleNavigation={toggleNavigation}
+          adaptor={adaptor}
+        />
         {!initialized ? (
           <Loader message="Initializing" themeOverrides={themeOverrides} />
         ) : (

@@ -144,8 +144,10 @@ export class OAuthSession extends AuthSession {
   }
 
   async login(_sudoId?: string | number): Promise<any> {
+    console.log('In login...')
     if (!this.isAuthenticated()) {
       if (!this.returnUrl) {
+        console.log('Pre Oauth...')
         // OAuth has not been initiated
         const authUrl = await this.createAuthCodeRequestUrl(
           'cors_api',
@@ -156,6 +158,7 @@ export class OAuthSession extends AuthSession {
         // Save the current URL so redirected successful OAuth login can restore it
         window.location.href = authUrl
       } else {
+        console.log('After Oauth...')
         // If return URL is stored, we must be coming back from an OAuth request
         // so release the stored return url at the start of the redemption
         this.returnUrl = null
@@ -253,7 +256,9 @@ export class OAuthSession extends AuthSession {
    * @returns {Promise<AuthToken>}
    */
   async redeemAuthCode(authCode: string, codeVerifier?: string) {
-    return this.requestToken(this.redeemAuthCodeBody(authCode, codeVerifier))
+    const body = this.redeemAuthCodeBody(authCode, codeVerifier)
+    const token = await this.requestToken(body)
+    return token
   }
 
   async getToken() {
