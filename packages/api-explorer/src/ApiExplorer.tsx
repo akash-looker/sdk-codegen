@@ -88,11 +88,10 @@ export const ApiExplorer: FC<ApiExplorerProps> = ({
   const { initialized } = useSpecStoreState()
   const specs = useSelector(selectSpecs)
   const spec = useSelector(selectCurrentSpec)
-  const { initLodesAction } = useLodeActions()
-  const { initSettingsAction } = useSettingActions()
+  // const { initLodesAction } = useLodeActions()
+  // const { initSettingsAction } = useSettingActions()
   const { initSpecsAction } = useSpecActions()
-  const location = useLocation()
-  const oauthReturn = location.pathname === `/${oAuthPath}`
+  // const location = useLocation()
 
   const [hasNavigation, setHasNavigation] = useState(true)
   const toggleNavigation = (target?: boolean) =>
@@ -105,17 +104,17 @@ export const ApiExplorer: FC<ApiExplorerProps> = ({
   }, [])
 
   registerEnvAdaptor(adaptor)
+
   useEffect(() => {
-    console.log('APIX mount, calling login')
     adaptor.login()
-    // initSpecsAction()
+    initSpecsAction()
     return () => unregisterEnvAdaptor()
   }, [])
 
-  useEffect(() => {
-    initSettingsAction()
-    initLodesAction({ examplesLodeUrl, declarationsLodeUrl })
-  }, [spec?.key])
+  // useEffect(() => {
+  // initSettingsAction()
+  // initLodesAction({ examplesLodeUrl, declarationsLodeUrl })
+  // }, [spec?.key])
 
   useEffect(() => {
     if (headless) {

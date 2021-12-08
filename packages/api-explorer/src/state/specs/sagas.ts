@@ -24,7 +24,7 @@
 
  */
 import type { SpecList } from '@looker/sdk-codegen'
-import { call, put, takeEvery, select } from 'typed-redux-saga'
+import { call, put, takeLatest, takeEvery, select } from 'typed-redux-saga'
 import { fallbackFetch, funFetch } from '@looker/run-it'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
@@ -43,10 +43,7 @@ function* initSaga() {
       (spec) => spec.status === 'current'
     )!.key
 
-    specs[currentSpecKey] = yield* call(() =>
-      adaptor.fetchSpec(specs[currentSpecKey])
-    )
-    console.log('here', specs, currentSpecKey)
+    yield* call(() => adaptor.fetchSpec(specs[currentSpecKey]))
     yield* put(initSpecsSuccessAction({ specs, currentSpecKey }))
   } catch {
     yield* put(initSpecsFailureAction(new Error('boom')))
@@ -69,6 +66,6 @@ export function* setCurrentSpecSaga(
 export function* saga() {
   const { initSpecsAction, setCurrentSpecAction } = specActions
 
-  yield* takeEvery(initSpecsAction, initSaga)
+  yield* takeLatest(initSpecsAction, initSaga)
   yield* takeEvery(setCurrentSpecAction, setCurrentSpecSaga)
 }

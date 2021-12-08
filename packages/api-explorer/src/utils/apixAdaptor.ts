@@ -25,9 +25,11 @@
  */
 import type { IEnvironmentAdaptor } from '@looker/extension-utils'
 import { getEnvAdaptor } from '@looker/extension-utils'
+import type { SpecItem, SpecList } from '@looker/sdk-codegen'
 
 export interface IApixAdaptor extends IEnvironmentAdaptor {
-  fetchSpecList(): Promise<any>
+  fetchSpecList(): Promise<SpecList>
+  fetchSpec(spec: SpecItem): Promise<SpecItem>
 }
 
 export const getApixAdaptor = () => getEnvAdaptor() as IApixAdaptor

@@ -145,7 +145,6 @@ export class OAuthSession extends AuthSession {
   }
 
   async login(_sudoId?: string | number): Promise<any> {
-    console.log('In login...')
     if (!this.isAuthenticated()) {
       if (this.reentry) {
         console.log('Deja vu')
