@@ -24,6 +24,7 @@
 
  */
 import { createStore } from '@looker/redux'
+import map from 'lodash/map'
 
 import type { SettingState } from './settings'
 import { defaultSettingsState, settingsSlice } from './settings'
@@ -32,7 +33,49 @@ import { lodesSlice, defaultLodesState } from './lodes'
 import type { SpecState } from './specs'
 import { defaultSpecsState, specsSlice } from './specs'
 
+const actionSanitizer = (action: any, _id: number): any => {
+  if (action.payload?.specs) {
+    action = {
+      ...action,
+      payload: {
+        ...action.payload,
+        spec: sanitizeSpecs(action.payload.specs),
+      },
+    }
+  }
+  return action
+}
+
+const stateSanitizer = (state: any, _id: number): any => {
+  if (state.specs) {
+    return {
+      ...state,
+      specs: sanitizeSpecs(state.specs),
+    }
+  }
+  return state
+}
+
+const sanitizeSpecs = (state: SpecState) => {
+  return {
+    ...state,
+    specs: state.specs
+      ? map(state.specs, (spec) => ({
+          ...spec,
+          api: undefined,
+          specContent: undefined,
+        }))
+      : undefined,
+  }
+}
+
+const devTools =
+  process.env.NODE_ENV !== 'production'
+    ? { actionSanitizer, stateSanitizer }
+    : false
+
 export const store = createStore({
+  devTools,
   preloadedState: {
     settings: defaultSettingsState,
     lodes: defaultLodesState,

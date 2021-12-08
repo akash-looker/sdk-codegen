@@ -25,7 +25,7 @@
  */
 
 import type { FC } from 'react'
-import React from 'react'
+import React, { useState } from 'react'
 import {
   fallbackFetch,
   fullify,
@@ -68,7 +68,7 @@ export class ApixAdaptor extends BrowserAdaptor implements IApixAdaptor {
   }
 
   async fetchSpec(spec: SpecItem): Promise<SpecItem> {
-    spec.specURL = fullify(spec.specURL, origin)
+    spec.specURL = fullify(spec.specURL!, origin)
     spec.api = await fallbackFetch(spec, funFetch)
     return spec
   }
@@ -77,7 +77,9 @@ export class ApixAdaptor extends BrowserAdaptor implements IApixAdaptor {
 export const StandaloneApiExplorer: FC<StandaloneApiExplorerProps> = ({
   headless = false,
 }) => {
-  const browserAdaptor = new ApixAdaptor(initRunItSdk(), window.origin)
+  const [browserAdaptor] = useState(
+    new ApixAdaptor(initRunItSdk(), window.origin)
+  )
 
   return (
     <Provider store={store}>

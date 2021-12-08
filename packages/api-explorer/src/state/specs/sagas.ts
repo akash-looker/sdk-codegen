@@ -38,12 +38,12 @@ function* initSaga() {
   const adaptor = getApixAdaptor()
 
   try {
-    const specs: SpecList = yield* call(() => adaptor.fetchSpecList())
+    const specs: SpecList = yield* call([adaptor, 'fetchSpecList'])
     const currentSpecKey = Object.values(specs).find(
       (spec) => spec.status === 'current'
     )!.key
 
-    yield* call(() => adaptor.fetchSpec(specs[currentSpecKey]))
+    yield* call([adaptor, 'fetchSpec'], specs[currentSpecKey])
     yield* put(initSpecsSuccessAction({ specs, currentSpecKey }))
   } catch {
     yield* put(initSpecsFailureAction(new Error('boom')))
