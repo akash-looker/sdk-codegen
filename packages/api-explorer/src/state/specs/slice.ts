@@ -43,7 +43,7 @@ export const defaultSpecsState: SpecState = {
   initialized: false,
 }
 
-type InitSuccessPayload = Pick<SpecState, 'specs' | 'currentSpecKey'>
+export type InitSuccessPayload = Pick<SpecState, 'specs' | 'currentSpecKey'>
 
 export interface SetCurrentSpecAction {
   currentSpecKey: string

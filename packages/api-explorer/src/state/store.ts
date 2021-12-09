@@ -24,50 +24,60 @@
 
  */
 import { createStore } from '@looker/redux'
+import type { PayloadAction } from '@reduxjs/toolkit'
+import type { Action } from 'redux'
 import map from 'lodash/map'
+import type { SpecList } from '@looker/sdk-codegen'
 
 import type { SettingState } from './settings'
 import { defaultSettingsState, settingsSlice } from './settings'
 import type { LodesState } from './lodes'
 import { lodesSlice, defaultLodesState } from './lodes'
-import type { SpecState } from './specs'
+import type { SpecState, InitSuccessPayload } from './specs'
 import { defaultSpecsState, specsSlice } from './specs'
 
-const actionSanitizer = (action: any, _id: number): any => {
-  if (action.payload?.specs) {
+const isInitSuccessAction = (
+  action: any
+): action is PayloadAction<InitSuccessPayload> => !!action.payload?.specs
+
+const actionSanitizer = <A extends Partial<Action>>(
+  action: A,
+  _id: number
+): A => {
+  if (isInitSuccessAction(action)) {
     action = {
       ...action,
       payload: {
         ...action.payload,
-        spec: sanitizeSpecs(action.payload.specs),
+        specs: sanitizeSpecs(action.payload.specs),
       },
     }
   }
   return action
 }
 
-const stateSanitizer = (state: any, _id: number): any => {
+const stateSanitizer = <S extends Partial<RootState>>(
+  state: S,
+  _index: number
+): S => {
   if (state.specs) {
     return {
       ...state,
-      specs: sanitizeSpecs(state.specs),
+      specs: {
+        ...state.specs,
+        specs: sanitizeSpecs(state.specs.specs),
+      },
     }
   }
   return state
 }
 
-const sanitizeSpecs = (state: SpecState) => {
-  return {
-    ...state,
-    specs: state.specs
-      ? map(state.specs, (spec) => ({
-          ...spec,
-          api: undefined,
-          specContent: undefined,
-        }))
-      : undefined,
-  }
-}
+const sanitizeSpecs = (specList: SpecList) =>
+  map(specList, (spec) => ({
+    ...spec,
+    api: spec.api ? '<api>' : undefined,
+    specContent: spec.specContent ? '<specContent>' : undefined,
+  })) as unknown as SpecList
 
 const devTools =
   process.env.NODE_ENV !== 'production'
